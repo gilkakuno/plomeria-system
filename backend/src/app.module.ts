@@ -27,6 +27,7 @@ import { AiAgentModule } from './ai-agent/ai-agent.module';
         autoLoadEntities: true,
         synchronize: true,
         logging: configService.get('NODE_ENV') === 'development',
+        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),
@@ -40,5 +41,4 @@ import { AiAgentModule } from './ai-agent/ai-agent.module';
     AiAgentModule,
   ],
 })
-export class AppModule {}
-
+export class AppModule { }
