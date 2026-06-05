@@ -1,0 +1,26 @@
+---
+# ── Namespace ────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: plomeria
+  labels:
+    app: plomeria-pro
+    environment: production
+
+---
+# ── ConfigMap: Variables de entorno no sensibles ─────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plomeria-config
+  namespace: plomeria
+data:
+  NODE_ENV: "production"
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "plomeria_db"
+  DB_USERNAME: "postgres"
+  PORT: "3000"
+  JWT_EXPIRATION: "8h"
+  FRONTEND_URL: "http://frontend-service"

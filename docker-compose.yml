@@ -1,0 +1,110 @@
+version: '3.9'
+
+services:
+
+  # ── PostgreSQL Database ──────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: plomeria_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: plomeria_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - plomeria_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d plomeria_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── NestJS Backend ───────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: plomeria_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres123
+      DB_NAME: plomeria_db
+      JWT_SECRET: cambia_este_secreto_en_produccion_2024
+      JWT_EXPIRATION: 8h
+      PORT: 3000
+      FRONTEND_URL: http://localhost:8080
+      RECAPTCHA_SECRET_KEY: ${RECAPTCHA_SECRET_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    ports:
+      - "3000:3000"
+    networks:
+      - plomeria_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/docs || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ── React Frontend (Nginx) ───────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: /api
+        VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY:-}
+    container_name: plomeria_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    networks:
+      - plomeria_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ── pgAdmin (opcional, solo desarrollo) ─────────────────
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: plomeria_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@plomeria.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    networks:
+      - plomeria_net
+    depends_on:
+      - postgres
+    profiles:
+      - dev   # solo se levanta con: docker-compose --profile dev up
+
+volumes:
+  postgres_data:
+    name: plomeria_postgres_data
+
+networks:
+  plomeria_net:
+    name: plomeria_network
+    driver: bridge
