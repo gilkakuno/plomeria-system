@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff, Wrench, Shield, ChevronRight } from 'lucide-react'
+import { Eye, EyeOff, Wrench, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
 import { useAuthStore } from '../store/authStore'
@@ -36,7 +36,8 @@ export default function LoginPage() {
   const { setAuth, isAuthenticated } = useAuthStore()
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [isRegister, setIsRegister] = useState(false)
+  const [isRegister, setIsRegister] = useState(false);
+  const [isHuman, setIsHuman] = useState(false)
   const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<FormData>()
   const password = watch('password', '')
 
@@ -45,7 +46,7 @@ export default function LoginPage() {
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
-      const captchaToken = 'dev_bypass'
+      const captchaToken = isHuman ? 'human' : ''
       if (isRegister) {
         await authAPI.register({ ...data })
         toast.success('Cuenta creada. Inicia sesión.')
@@ -77,8 +78,7 @@ export default function LoginPage() {
             <Wrench size={22} color="#fff" />
           </div>
           <div>
-            <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, lineHeight: 1.2 }}>Plomería Pro</div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>Sistema de Gestión</div>
+            <title>Plomería Kuno - Sistema de Gestión</title>
           </div>
         </div>
 
@@ -147,11 +147,19 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* reCAPTCHA notice */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 20, padding: '10px 14px', background: 'rgba(0,87,255,0.12)', borderRadius: 8, border: '1px solid rgba(0,87,255,0.25)' }}>
-          <Shield size={14} style={{ color: '#4d8bff', flexShrink: 0 }} />
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>Protegido con Google reCAPTCHA v3</span>
-        </div>
+          {/* Captcha Checkbox */}
+          <div style={{ marginTop: 20 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)', padding: '8px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.12)' }}>
+              <input
+                type="checkbox"
+                id="captchaCheckbox"
+                checked={isHuman}
+                onChange={e => setIsHuman(e.target.checked)}
+                style={{ width: 16, height: 16 }}
+              />
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>No soy un robot</span>
+            </label>
+          </div>
 
         <button onClick={() => { setIsRegister(!isRegister); reset() }}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 20, fontFamily: 'Poppins' }}>

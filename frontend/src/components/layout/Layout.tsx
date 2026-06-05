@@ -99,7 +99,7 @@ export default function Layout() {
   }
 
   const initials = (user?.fullName || user?.username || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()
-  const breadcrumb = BREADCRUMBS[pathname] || 'Plomería Pro'
+  const breadcrumb = BREADCRUMBS[pathname] || 'Plomería Kuno'
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -112,8 +112,8 @@ export default function Layout() {
           </div>
           {!collapsed && (
             <div className="logo-text">
-              Plomería Pro
-              <div className="logo-sub">Sistema de Gestión</div>
+                Plomería Kuno
+              <title>Plomería Kuno - Sistema de Gestión</title>
             </div>
           )}
         </div>
@@ -162,7 +162,8 @@ export default function Layout() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div className="topbar-avatar" style={{ flexShrink: 0 }}>{initials}</div>
               <div style={{ flex: 1, overflow: 'hidden' }}>
-                <div style={{ color: '#fff', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, lineHeight: 1.2 }}>Plomería Kuno</div>
+                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.fullName || user?.username}
                 </div>
                 <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, textTransform: 'capitalize' }}>{user?.role}</div>
@@ -191,7 +192,7 @@ export default function Layout() {
               {breadcrumb.split('/').pop()?.trim()}
             </div>
             <div className="topbar-breadcrumb">
-              Plomería Pro &rsaquo; {breadcrumb}
+              Plomería Kuno &rsaquo; {breadcrumb}
             </div>
           </div>
 

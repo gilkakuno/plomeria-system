@@ -48,7 +48,7 @@ export class ReportsService {
               stack: [
                 { text: 'EMPRESA DE PLOMERÍA', style: 'companyName' },
                 { text: 'Servicios Profesionales de Plomería', style: 'companySubtitle' },
-                { text: 'Tel: +591 XXX-XXXX | La Paz, Bolivia', style: 'companyContact' },
+                { text: 'Tel: +591 705785960 | La Paz, Bolivia', style: 'companyContact' },
               ],
             },
             {
