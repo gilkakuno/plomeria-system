@@ -39,22 +39,22 @@ export default function App() {
             boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
           },
           success: { iconTheme: { primary: '#00a854', secondary: '#fff' } },
-          error:   { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
         }}
       />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard"   element={<DashboardPage />} />
-          <Route path="inventory"   element={<InventoryPage />} />
-          <Route path="clients"     element={<ClientsPage />} />
-          <Route path="projects"    element={<ProjectsPage />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="inventory" element={<InventoryPage />} />
+          <Route path="clients" element={<ClientsPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/:id" element={<ProjectDetailPage />} />
-          <Route path="ai-agent"    element={<AiAgentPage />} />
-          <Route path="reports"     element={<ReportsPage />} />
-          <Route path="users"       element={<AdminRoute><UsersPage /></AdminRoute>} />
-          <Route path="logs"        element={<AdminRoute><LogsPage /></AdminRoute>} />
+          <Route path="ai-agent" element={<AiAgentPage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="users" element={<AdminRoute><UsersPage /></AdminRoute>} />
+          <Route path="logs" element={<AdminRoute><LogsPage /></AdminRoute>} />
         </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

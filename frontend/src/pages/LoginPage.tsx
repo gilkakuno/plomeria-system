@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff, Wrench, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
+import ReCAPTCHA from 'react-google-recaptcha'
 import { authAPI } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 
@@ -18,7 +19,7 @@ function StrengthBar({ password }: { password: string }) {
   return (
     <div style={{ marginTop: 6 }}>
       <div className="strength-bar">
-        {[1,2,3].map(i => (
+        {[1, 2, 3].map(i => (
           <div key={i} className="strength-segment" style={{ background: i <= level ? colors[level] : undefined }} />
         ))}
       </div>
@@ -37,22 +38,36 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
   const [isRegister, setIsRegister] = useState(false);
-  const [isHuman, setIsHuman] = useState(false)
-  const { register, handleSubmit, watch, formState: { errors }, reset } = useForm<FormData>()
-  const password = watch('password', '')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaError, setCaptchaError] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<FormData>();
+
+  const password = watch('password', '');
 
   useEffect(() => { if (isAuthenticated) navigate('/dashboard') }, [isAuthenticated])
 
   const onSubmit = async (data: FormData) => {
+    if (!captchaToken) {
+      setCaptchaError(true);
+      return;
+    }
     setLoading(true)
     try {
-      const captchaToken = isHuman ? 'human' : ''
+      // captchaToken is managed by ReCAPTCHA component
       if (isRegister) {
         await authAPI.register({ ...data })
         toast.success('Cuenta creada. Inicia sesión.')
         setIsRegister(false); reset()
       } else {
-        const res = await authAPI.login({ username: data.username, password: data.password, captchaToken })
+        const res = await authAPI.login({ username: data.username, password: data.password, captchaToken: captchaToken ?? '' })
         setAuth(res.data.user, res.data.access_token)
         toast.success(`¡Bienvenido, ${res.data.user.fullName || res.data.user.username}!`)
         navigate('/dashboard')
@@ -61,6 +76,11 @@ export default function LoginPage() {
       toast.error(e.response?.data?.message || 'Credenciales incorrectas')
     } finally { setLoading(false) }
   }
+
+  const handleCaptchaChange = (token: string | null) => {
+    setCaptchaToken(token);
+    if (token) setCaptchaError(false);
+  };
 
   return (
     <div style={{
@@ -132,6 +152,26 @@ export default function LoginPage() {
             {isRegister && <StrengthBar password={password} />}
           </div>
 
+          <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div style={{
+              borderRadius: 4,
+              overflow: 'hidden',
+              border: captchaError ? '2px solid #ef4444' : '2px solid transparent',
+              transition: 'all 0.3s ease',
+              boxShadow: captchaError ? '0 0 15px rgba(239, 68, 68, 0.2)' : '0 4px 14px rgba(0,0,0,0.1)'
+            }}>
+              <ReCAPTCHA
+                theme="dark"
+                sitekey={((import.meta as any).env.VITE_RECAPTCHA_SITE_KEY as string) || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"}
+                onChange={handleCaptchaChange}
+              />
+            </div>
+            {captchaError && (
+              <div style={{ color: '#ef4444', fontSize: 13, marginTop: 8, display: 'flex', alignItems: 'center', gap: 6, fontWeight: 500, animation: 'fadeIn 0.3s ease' }}>
+                <span>⚠️</span> Por favor, verifica que no eres un robot.
+              </div>
+            )}
+          </div>
           <button type="submit" disabled={loading} className="btn btn-primary"
             style={{ padding: '12px 20px', fontSize: 14, justifyContent: 'center', marginTop: 4 }}>
             {loading ? (
@@ -147,19 +187,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-          {/* Captcha Checkbox */}
-          <div style={{ marginTop: 20 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', background: 'rgba(255,255,255,0.07)', padding: '8px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.12)' }}>
-              <input
-                type="checkbox"
-                id="captchaCheckbox"
-                checked={isHuman}
-                onChange={e => setIsHuman(e.target.checked)}
-                style={{ width: 16, height: 16 }}
-              />
-              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)' }}>No soy un robot</span>
-            </label>
-          </div>
+        
 
         <button onClick={() => { setIsRegister(!isRegister); reset() }}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: 13, marginTop: 20, fontFamily: 'Poppins' }}>

@@ -1,8 +1,6 @@
 import axios from 'axios'
 
-const API_URL = (import.meta as any).env?.PROD
-  ? 'https://plomeria-backend.onrender.com'
-  : 'http://localhost:3000';
+const API_URL = (import.meta as any).env?.VITE_API_URL || '/api'
 
 const api = axios.create({
   baseURL: API_URL,
